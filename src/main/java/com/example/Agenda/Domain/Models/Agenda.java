@@ -25,10 +25,19 @@ public class Agenda {
     @Getter
     @Setter
     @OneToMany(mappedBy = "agenda", cascade = CascadeType.ALL, orphanRemoval = true)
-    public Collection<AgendaEnderecos> Endereco  = new ArrayList<>();;
+    public Collection<AgendaEnderecos> Endereco  = new ArrayList<>();
 
-    public Collection<AgendaContatos> getContatos()
+    public Collection<AgendaContatos> getContatos() {
+        return this.Contato;
+    }
+
+    public Collection<AgendaEnderecos> getEnderecos() {
+        return this.Endereco;
+    }
+
+    public void setAgenda()
     {
-        return Contato;
+        this.Contato.forEach(c -> c.setAgenda(this));
+        this.Endereco.forEach(e -> e.setAgenda(this));
     }
 }

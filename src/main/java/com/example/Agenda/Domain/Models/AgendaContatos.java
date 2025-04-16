@@ -2,10 +2,7 @@ package com.example.Agenda.Domain.Models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @Data
@@ -24,7 +21,8 @@ public class AgendaContatos {
     @Size(max=20)
     public String Telefone;
 
-    @ManyToOne
-    @JoinColumn(name = "agenda_id", nullable = false)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "agenda_id", nullable = true)
+    @ToString.Exclude
     private Agenda agenda;
 }

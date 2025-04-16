@@ -1,15 +1,20 @@
 package com.example.Agenda.Service.Impl;
 
-import com.example.Agenda.Domain.Dto.AgendaAdicionarRequestDto;
-import com.example.Agenda.Domain.Dto.AgendaAdicionarResponseDto;
+import com.example.Agenda.Domain.Dto.AgendaAddRequestDto;
+import com.example.Agenda.Domain.Dto.AgendaAddResponseDto;
+import com.example.Agenda.Domain.Dto.AgendaGetRespondeDto;
+import com.example.Agenda.Domain.Dto.AgendaRemoveResponseDto;
 import com.example.Agenda.Domain.Models.Agenda;
-import com.example.Agenda.Domain.Models.AgendaContatos;
 import com.example.Agenda.Repository.IAgendaRepository;
 import com.example.Agenda.Service.IAgendaService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -18,22 +23,47 @@ public class AgendaService implements IAgendaService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public AgendaAdicionarResponseDto Adicionar(AgendaAdicionarRequestDto request)
+    public AgendaAddResponseDto Add(AgendaAddRequestDto request)
     {
         Agenda agenda = modelMapper.map(request, Agenda.class);
 
-        var novaagenda = new Agenda();
-        novaagenda.setDocumento("000000000000");
-        novaagenda.setNome("nome teste");
+        if (agenda.getContatos() != null) {
+            agenda.getContatos().forEach(contato -> contato.setAgenda(agenda));
+        }
 
-        var novocontato = new AgendaContatos();
-        novocontato.setCelular("99999999");
-        novocontato.setAgenda(novaagenda);
-
-        novaagenda.getContatos().add(novocontato);
+        if (agenda.getEnderecos() != null) {
+            agenda.getEnderecos().forEach(endereco -> endereco.setAgenda(agenda));
+        }
 
         repository.save(agenda);
 
-        return AgendaAdicionarResponseDto.ReturnSuccess();
+        return AgendaAddResponseDto.ReturnSuccess();
+    }
+
+    @Override
+    public List<AgendaGetRespondeDto> GetAll() {
+        List<Agenda> agendaList = repository.findAll();
+
+        Type listType = new TypeToken<List<AgendaGetRespondeDto>>() {}.getType();
+
+        return modelMapper.map(agendaList, listType);
+    }
+
+    @Override
+    public AgendaGetRespondeDto Get(long id) {
+        var agenda = repository.findById(id);
+
+        return modelMapper.map(agenda, AgendaGetRespondeDto.class);
+    }
+
+    @Override
+    public AgendaRemoveResponseDto Remove(long id) {
+        var agenda = repository.findById(id);
+        if (agenda.isEmpty())
+            return AgendaRemoveResponseDto.ReturnError("Não existe registro para o id informado.");
+
+        repository.delete(agenda.get());
+
+        return AgendaRemoveResponseDto.ReturnSuccess();
     }
 }

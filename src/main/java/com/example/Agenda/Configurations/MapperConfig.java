@@ -1,8 +1,6 @@
 package com.example.Agenda.Configurations;
 
-import com.example.Agenda.Domain.Dto.AgendaAdicionarRequestDto;
-import com.example.Agenda.Domain.Dto.AgendaContatoAdicionarRequestDto;
-import com.example.Agenda.Domain.Dto.AgendaEnderecoAdicionarRequestDto;
+import com.example.Agenda.Domain.Dto.*;
 import com.example.Agenda.Domain.Models.Agenda;
 import com.example.Agenda.Domain.Models.AgendaContatos;
 import com.example.Agenda.Domain.Models.AgendaEnderecos;
@@ -35,15 +33,16 @@ public class MapperConfig extends ModelMapper {
     }
 
     private static void CreateMaps(ModelMapper modelMapper) {
-        modelMapper.createTypeMap(AgendaAdicionarRequestDto.class, Agenda.class)
-                .addMappings(mapper -> {
-                    mapper.map(AgendaAdicionarRequestDto::getDocumento, Agenda::setDocumento);
-                    mapper.map(AgendaAdicionarRequestDto::getNome, Agenda::setNome);
-                    mapper.map(AgendaAdicionarRequestDto::getContato, Agenda::setContato);
-                    mapper.map(AgendaAdicionarRequestDto::getEndereco, Agenda::setEndereco);
-                });
+        //region Adicionar
+        modelMapper.createTypeMap(AgendaAddRequestDto.class, Agenda.class);
+        modelMapper.createTypeMap(AgendaContatoAddRequestDto.class, AgendaContatos.class);
+        modelMapper.createTypeMap(AgendaEnderecoAddRequestDto.class, AgendaEnderecos.class);
+        //endregion
 
-        modelMapper.createTypeMap(AgendaContatoAdicionarRequestDto.class, AgendaContatos.class);
-        modelMapper.createTypeMap(AgendaEnderecoAdicionarRequestDto.class, AgendaEnderecos.class);
+        //region GetAll
+        modelMapper.createTypeMap(Agenda.class, AgendaGetRespondeDto.class);
+        modelMapper.createTypeMap(AgendaContatos.class, AgendaContatoGetRespondeDto.class);
+        modelMapper.createTypeMap(AgendaEnderecos.class, AgendaEnderecoGetRespondeDto.class);
+        //endregion
     }
 }
