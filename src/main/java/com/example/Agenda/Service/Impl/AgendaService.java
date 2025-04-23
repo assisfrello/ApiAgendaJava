@@ -1,5 +1,6 @@
 package com.example.Agenda.Service.Impl;
 
+import com.example.Agenda.Configurations.RabbitConfig;
 import com.example.Agenda.Domain.Dto.AgendaAddRequestDto;
 import com.example.Agenda.Domain.Dto.AgendaAddResponseDto;
 import com.example.Agenda.Domain.Dto.AgendaGetRespondeDto;
@@ -10,6 +11,7 @@ import com.example.Agenda.Service.IAgendaService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +21,14 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class AgendaService implements IAgendaService {
+    private final RabbitTemplate rabbitTemplate;
     private final IAgendaRepository repository;
     @Autowired
     private ModelMapper modelMapper;
 
     public AgendaAddResponseDto Add(AgendaAddRequestDto request)
     {
-        Agenda agenda = modelMapper.map(request, Agenda.class);
+        var agenda = modelMapper.map(request, Agenda.class);
 
         if (agenda.getContatos() != null) {
             agenda.getContatos().forEach(contato -> contato.setAgenda(agenda));
@@ -35,7 +38,8 @@ public class AgendaService implements IAgendaService {
             agenda.getEnderecos().forEach(endereco -> endereco.setAgenda(agenda));
         }
 
-        repository.save(agenda);
+        //repository.save(agenda);
+        rabbitTemplate.convertAndSend(RabbitConfig.AgendaAddQueue, "agenda");
 
         return AgendaAddResponseDto.ReturnSuccess();
     }
