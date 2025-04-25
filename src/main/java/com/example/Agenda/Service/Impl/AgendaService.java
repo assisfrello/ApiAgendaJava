@@ -44,8 +44,11 @@ public class AgendaService implements IAgendaService {
             agenda.getEnderecos().forEach(endereco -> endereco.setAgenda(agenda));
         }
 
-        //repository.save(agenda);
-        rabbitTemplate.convertAndSend(RabbitConfig.AgendaAddQueue, "agenda");
+        var possuiDocumentoCadastrado = repository.findByDocumento(request.getDocumento());
+        if (possuiDocumentoCadastrado.isPresent())
+            return AgendaAddResponseDto.ReturnError("Documento já cadastrado");
+
+        rabbitTemplate.convertAndSend(RabbitConfig.AgendaAddQueue, agenda);
 
         return AgendaAddResponseDto.ReturnSuccess();
     }

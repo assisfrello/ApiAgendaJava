@@ -1,5 +1,6 @@
 package com.example.Agenda.Domain.Models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -21,10 +22,10 @@ public class Agenda {
     public String documento;
     @Size(max=100)
     public String Nome;
+    @JsonManagedReference
     @OneToMany(mappedBy = "agenda", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Collection<AgendaContatos> Contato = new ArrayList<>();;
-    @Getter
-    @Setter
+    private Collection<AgendaContatos> Contato = new ArrayList<>();
+    @JsonManagedReference
     @OneToMany(mappedBy = "agenda", cascade = CascadeType.ALL, orphanRemoval = true)
     public Collection<AgendaEnderecos> Endereco  = new ArrayList<>();
 

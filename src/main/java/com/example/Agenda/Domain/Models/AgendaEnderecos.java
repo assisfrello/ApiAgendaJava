@@ -1,5 +1,6 @@
 package com.example.Agenda.Domain.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -27,6 +28,7 @@ public class AgendaEnderecos {
     @Size(max=2)
     public String Uf;
 
+    @JsonBackReference
     @ManyToOne(optional = true)
     @JoinColumn(name = "agenda_id", nullable = true)
     @ToString.Exclude
