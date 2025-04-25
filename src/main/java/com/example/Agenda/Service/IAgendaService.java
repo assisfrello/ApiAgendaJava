@@ -14,5 +14,7 @@ public interface IAgendaService {
 
     AgendaGetRespondeDto Get(long id);
 
+    AgendaGetRespondeDto GetByDocumento(String documento);
+
     AgendaRemoveResponseDto Remove(long id);
 }

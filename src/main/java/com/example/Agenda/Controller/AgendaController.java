@@ -40,6 +40,15 @@ public class AgendaController {
         }
     }
 
+    @GetMapping("/documento/{documento}")
+    public AgendaGetRespondeDto BuscarPorDocumento(@PathVariable String documento) {
+        try {
+            return service.GetByDocumento(documento);
+        } catch (ValidationException e){
+            return null;
+        }
+    }
+
     @PostMapping
     @Transactional
     public AgendaAddResponseDto Add(@RequestBody AgendaAddRequestDto request)

@@ -1,5 +1,9 @@
 package com.example.Agenda.Service.Impl;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.GetRequest;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
 import com.example.Agenda.Configurations.RabbitConfig;
 import com.example.Agenda.Domain.Dto.AgendaAddRequestDto;
 import com.example.Agenda.Domain.Dto.AgendaAddResponseDto;
@@ -15,6 +19,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -22,6 +27,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AgendaService implements IAgendaService {
     private final RabbitTemplate rabbitTemplate;
+    private final ElasticsearchClient elasticsearchClient;
     private final IAgendaRepository repository;
     @Autowired
     private ModelMapper modelMapper;
@@ -61,6 +67,29 @@ public class AgendaService implements IAgendaService {
     }
 
     @Override
+    public AgendaGetRespondeDto GetByDocumento(String documento) {
+        try {
+            var getRequest = GetRequest.of(g -> g
+                    .index("agenda")
+                    .id(documento)
+            );
+
+            var response = elasticsearchClient.get(getRequest, Agenda.class);
+
+            if (response.found()) {
+                return modelMapper.map(response.source(), AgendaGetRespondeDto.class);
+            }
+
+            var agenda = repository.findByDocumento(documento).orElse(null);
+            SalvarAgendaElastic(agenda);
+
+            return modelMapper.map(agenda, AgendaGetRespondeDto.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao buscar agenda no Elasticsearch", e);
+        }
+    }
+
+    @Override
     public AgendaRemoveResponseDto Remove(long id) {
         var agenda = repository.findById(id);
         if (agenda.isEmpty())
@@ -70,4 +99,20 @@ public class AgendaService implements IAgendaService {
 
         return AgendaRemoveResponseDto.ReturnSuccess();
     }
+
+    //region Métodos privados
+    private void SalvarAgendaElastic(Agenda agenda) {
+        try {
+            IndexRequest<Agenda> request = IndexRequest.of(i -> i
+                    .index("agenda")
+                    .id(agenda.getDocumento())
+                    .document(agenda)
+            );
+
+            IndexResponse response = elasticsearchClient.index(request);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao salvar Agenda no Elasticsearch", e);
+        }
+    }
+    //endregion
 }

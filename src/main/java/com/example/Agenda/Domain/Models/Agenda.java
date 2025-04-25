@@ -16,8 +16,9 @@ public class Agenda {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
+    @Column(name = "documento")
     @Size(max=14)
-    public String Documento;
+    public String documento;
     @Size(max=100)
     public String Nome;
     @OneToMany(mappedBy = "agenda", cascade = CascadeType.ALL, orphanRemoval = true)
